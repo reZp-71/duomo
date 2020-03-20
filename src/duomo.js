@@ -86,7 +86,7 @@ class Duomo {
 
     ruotaModello(angolo){
         if (!!this.model)
-            this.model.rotation.y += angolo;
+            this.model.rotation.y = angolo;
     }
 }
 

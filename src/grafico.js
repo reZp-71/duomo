@@ -3,12 +3,14 @@ import * as d3 from "d3";
 class Grafico {
   // quando inizializzo un oggetto
   // prende i parametri già settati se non gli passo niente
-  constructor(mountPoint = "body", width = 500, height = 200, padding = 40) {
-    //this è il puntatore all'oggetto di tipo Barchart
+  constructor(mountPoint = "body", width = 500, height = 200, padding = 40, clickCallback) {
+    //this è il puntatore all'oggetto di tipo Barchat
     this.mountPoint = mountPoint;
     this.width = width;
     this.height = height;
     this.padding = padding;
+    this.clickCallback = clickCallback;
+
     this.grafico = d3
       .select(mountPoint)
       .append("svg") // svg è un tag
@@ -38,7 +40,7 @@ class Grafico {
     return (
       d3
         .scaleLinear()
-        .domain([1, d3.max(data)])
+        .domain([1, d3.max(data.map(o=>o.dato))])
         // il range va dal max al min per far ordinare giusti i valori sull'asse Y
         .range([this.height - this.padding, this.padding])
     );
@@ -67,7 +69,6 @@ class Grafico {
       .select("#plot-area")
       .selectAll("rect")
       .data(data);
-    console.log("prima", bars);
 
     bars
       .enter()
@@ -88,18 +89,16 @@ class Grafico {
       .attr(
         "height",
         (valore, indice) =>
-          this.yScale(data)(d3.max(data) - valore) - this.padding
+          this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato) - this.padding
       )
       .attr(
         "y",
         (valore, indice) =>
-          this.height - this.yScale(data)(d3.max(data) - valore)
+          this.height - this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato)
       )
       .transition()
       .duration(1000)
       .attr("fill", "red");
-
-    console.log("dopo", bars);
 
     bars
       .exit()
@@ -139,17 +138,16 @@ class Grafico {
       .duration(2400)
       .attr("opacity", 1)
       .attr("y", (valore, indice) => {
-        if (this.yScale(data)(d3.max(data) - valore) > this.height - 60) {
-          return this.height - this.yScale(data)(d3.max(data) - valore) + 30;
-          return this.yScale(data)(valore) - 30;
+        if (this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato) > this.height - 60) {
+          return this.height - this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato) + 30;
         } else {
           //scaleLog
           //return this.height - this.yScale(data)(valore) - 10;
-          return this.height - this.yScale(data)(d3.max(data) - valore) - 10;
+          return this.height - this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato) - 10;
         }
       })
       .attr("fill", valore => {
-        if (this.yScale(data)(d3.max(data) - valore) > this.height - 60) {
+        if (this.yScale(data)(d3.max(data.map(o=>o.dato)) - valore.dato) > this.height - 60) {
           return "#ffffff";
         } else {
           return "teal";
@@ -160,7 +158,7 @@ class Grafico {
       .attr("font-size", 22)
       .attr("rx", 2)
       .attr("ry", 2)
-      .text(d => d);
+      .text(d => d.dato);
 
     etichette
       .exit()
@@ -206,16 +204,17 @@ class Grafico {
   }
   
   addInteraction() {
-    d3.selectAll("rect").on("click", (valore, indice) =>
-      console.log(valore, indice, this)
+    d3.selectAll("rect").on("click", (valore, indice) =>{
+        this.clickCallback(valore);
+        }
     );
   }
 
   render(data) {
-    this.renderBars( data.map(o=>o.dato) );
-    this.renderLabels( data.map(o=>o.dato) );
+    this.renderBars( data );
+    this.renderLabels( data );
     this.renderLabelsColonne( data.map(o=>o.nome) );
-    //this.addInteraction();
+    this.addInteraction();
   }
 }
 
