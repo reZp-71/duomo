@@ -1,5 +1,5 @@
 //--- IMPORTA DIPENDENZE ESTERNE
-// import _ from 'lodash';
+import _ from 'lodash';
 
 //--- IMPORTA DIPENDENZE INTERNE
 // import * as Modulo from './modulo.js';
@@ -8,4 +8,7 @@
 import './style.scss';
 
 //-- INSERISCI QUI IL TUO CODICE
-console.log("hello-world");
+fetch('http://127.0.0.1:3000/quartieri')
+    .then(response => response.json())
+    .then(response => _.sortBy(response,"nome") )
+    .then(response => console.log(response))

@@ -35,6 +35,10 @@ module.exports = {
                 }
             },
             {
+                test: /\.glb$/,
+                use: ['file-loader']
+            },
+            {
                 test: /\.css$/,
                 use: [MiniCssExtractPlugin.loader, 'css-loader'],
             },
